@@ -81,3 +81,4 @@ C:\Users\david_ascencio\RiderProjects\RygReport\RygReport\bin\Debug\net8.0\runti
 C:\Users\david_ascencio\RiderProjects\RygReport\RygReport\obj\Debug\net8.0\RygReport.csproj.Up2Date
 C:\Users\david_ascencio\RiderProjects\RygReport\RygReport\obj\Debug\net8.0\RygReport.genruntimeconfig.cache
 C:\Users\david_ascencio\RiderProjects\RygReport\RygReport\obj\Debug\net8.0\ref\RygReport.dll
+C:\Users\david_ascencio\RiderProjects\RygReport\RygReport\obj\Debug\net8.0\RygReport.sourcelink.json

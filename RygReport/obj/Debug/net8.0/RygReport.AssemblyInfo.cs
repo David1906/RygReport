@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RygReport")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16e17e96a23dec3dcc3944ddc87cf7ca946ff22c")]
 [assembly: System.Reflection.AssemblyProductAttribute("RygReport")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RygReport")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
