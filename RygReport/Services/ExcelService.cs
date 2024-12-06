@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 
@@ -25,6 +26,29 @@ public class ExcelService
     public string GetStringCellValue(string sheetName, int row, int col)
     {
         return this._workbook.GetSheet(sheetName).GetRow(row).GetCell(col).StringCellValue;
+    }
+
+    public List<int> FindValueRows(string sheetName, string searchValue, CellRangeAddress rangeAddress)
+    {
+        var sheet = this.GetSheet(sheetName);
+        var firstRow = rangeAddress.FirstRow;
+        var lastRow = rangeAddress.LastRow;
+        var firstCol = rangeAddress.FirstColumn;
+
+        var rows = new List<int>();
+
+        for (var rowIdx = firstRow; rowIdx <= lastRow; rowIdx++)
+        {
+            var row = sheet.GetRow(rowIdx);
+            var cell = row?.GetCell(firstCol);
+            if (cell is not { CellType: CellType.String }) continue;
+            if (cell.StringCellValue.Equals(searchValue, StringComparison.OrdinalIgnoreCase))
+            {
+                rows.Add(cell.RowIndex);
+            }
+        }
+
+        return rows;
     }
 
     public int FindValueInRange(string sheetName, string searchValue, CellRangeAddress rangeAddress)
@@ -58,7 +82,17 @@ public class ExcelService
 
     public List<int> FindNotEmptyColumns(string sheetName, CellRangeAddress rangeAddress)
     {
-        var columnsWithValue1 = new List<int>();
+        return FindNotEmptyCells(sheetName, rangeAddress).Select(x => x.ColumnIndex).ToList();
+    }
+
+    public List<int> FindNotEmptyRows(string sheetName, CellRangeAddress rangeAddress)
+    {
+        return FindNotEmptyCells(sheetName, rangeAddress).Select(x => x.RowIndex).ToList();
+    }
+
+    private List<ICell> FindNotEmptyCells(string sheetName, CellRangeAddress rangeAddress)
+    {
+        var columns = new List<ICell>();
         var sheet = this.GetSheet(sheetName);
 
         var firstRow = rangeAddress.FirstRow;
@@ -76,12 +110,12 @@ public class ExcelService
                 var cell = row.GetCell(colIdx);
                 if (!IsEmpty(cell))
                 {
-                    columnsWithValue1.Add(cell.ColumnIndex);
+                    columns.Add(cell);
                 }
             }
         }
 
-        return columnsWithValue1;
+        return columns;
     }
 
     private static bool IsEmpty(ICell? cell)

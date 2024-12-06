@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NPOI.SS.Util;
 using RygReport.Models;
 
@@ -28,7 +29,19 @@ public class RgyReportService
 
     private void ProcessMaterialGroup(Material material)
     {
-        var models = this.GetModels(material);
+        var materials = this.GetMaterials(material.Group);
+        var models = this.GetModels(materials.First());
+    }
+
+    private List<Material> GetMaterials(string materialGroup)
+    {
+        var materials = _excelService.FindValueRows(DemandSheet, materialGroup, CellRangeAddress.ValueOf("A1:A10000"));
+        return materials.Select(x => new Material()
+            {
+                Group = materialGroup,
+                PartNumber = this._excelService.GetStringCellValue(DemandSheet, x + 1, 1)
+            }
+        ).ToList();
     }
 
     private List<ProductModel> GetModels(Material material)
