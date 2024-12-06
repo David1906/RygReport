@@ -62,6 +62,7 @@ public partial class RgyReportService : ObservableObject
         this.Status = "Saving workbook...";
         this._excelOutService.Save(WorkbookOutFullPath);
         this.Status = "IDLE";
+        _lastDemandRow = 0;
     }
 
     private int ProcessMaterialGroup(string materialGroup, int startingRow, int item)
@@ -124,9 +125,13 @@ public partial class RgyReportService : ObservableObject
 
                 _excelOutService.WriteCellFormula(RygSheet, balanceRow, typeDateColIdx + colDelta, balanceFormula);
 
+
                 // Demand formula
-                _excelOutService.WriteCellFormula(RygSheet, demandRow, typeDateColIdx + colDelta,
-                    $"IFERROR(VLOOKUP($J${currentRow + 1},{DemandSheet}!$B:$CX, MATCH(WEEKNUM({columnLetter}1)-1,{DemandSheet}!2:2,0),FALSE),0)");
+                if (currentRow == startingDataRow)
+                {
+                    _excelOutService.WriteCellFormula(RygSheet, demandRow, typeDateColIdx + colDelta,
+                        $"IFERROR(VLOOKUP($J${startingDataRow + 1},{DemandSheet}!$B:$CX, MATCH({columnLetter}1,{DemandSheet}!1:1,0)-1,FALSE),0)");
+                }
             }
         }
 
