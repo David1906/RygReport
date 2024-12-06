@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 
 namespace RygReport.Services;
 
@@ -12,10 +15,20 @@ public class ExcelService
     public const int NotFound = -1;
 
     private IWorkbook _workbook;
+    private IFormulaEvaluator? FormulaEvaluator { get; set; }
 
     public void Read(string fullPath)
     {
-        this._workbook = WorkbookFactory.Create(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
+        try
+        {
+            this.FormulaEvaluator = new XSSFFormulaEvaluator(this._workbook);
+            this._workbook = WorkbookFactory.Create(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            this._workbook = new XSSFWorkbook();
+        }
     }
 
     public ISheet? GetSheet(string name)
@@ -25,15 +38,46 @@ public class ExcelService
 
     public string GetStringCellValue(string sheetName, int row, int col)
     {
-        return this._workbook.GetSheet(sheetName).GetRow(row).GetCell(col).StringCellValue;
+        var cell = this._workbook.GetSheet(sheetName).GetRow(row).GetCell(col);
+
+        if (cell == null)
+        {
+            return "";
+        }
+
+        var type = cell?.CellType;
+        if (cell?.CellType == CellType.Formula)
+        {
+            type = this.FormulaEvaluator?.EvaluateFormulaCell(cell);
+        }
+
+        switch (type)
+        {
+            case CellType.Numeric:
+                return cell.NumericCellValue.ToString().Trim();
+            case CellType.String:
+                return cell.StringCellValue.ToString().Trim();
+            case CellType.Boolean:
+                return cell.BooleanCellValue.ToString().Trim();
+            case CellType.Error:
+                return cell.ErrorCellValue.ToString().Trim();
+            default:
+                return "";
+        }
     }
 
-    public List<int> FindValueRows(string sheetName, string searchValue, CellRangeAddress rangeAddress)
+    public double GetNumericCellValue(string sheetName, int row, int col)
+    {
+        return this._workbook.GetSheet(sheetName).GetRow(row).GetCell(col).NumericCellValue;
+    }
+
+    public List<int> FindConcurrentValueRows(string sheetName, string searchValue, CellRangeAddress rangeAddress)
     {
         var sheet = this.GetSheet(sheetName);
         var firstRow = rangeAddress.FirstRow;
         var lastRow = rangeAddress.LastRow;
         var firstCol = rangeAddress.FirstColumn;
+        var found = false;
 
         var rows = new List<int>();
 
@@ -45,6 +89,11 @@ public class ExcelService
             if (cell.StringCellValue.Equals(searchValue, StringComparison.OrdinalIgnoreCase))
             {
                 rows.Add(cell.RowIndex);
+                found = true;
+            }
+            else if (found)
+            {
+                break;
             }
         }
 
@@ -138,5 +187,94 @@ public class ExcelService
             default:
                 return false;
         }
+    }
+
+    public IEnumerable<string> GetUniqueStringValues(string sheetName, CellRangeAddress rangeAddress)
+    {
+        var sheet = this.GetSheet(sheetName);
+        var uniqueValues = new HashSet<string>();
+
+        var firstRow = rangeAddress.FirstRow;
+        var lastRow = rangeAddress.LastRow;
+        var firstCol = rangeAddress.FirstColumn;
+        var lastCol = rangeAddress.LastColumn;
+
+        for (var rowIdx = firstRow; rowIdx <= lastRow; rowIdx++)
+        {
+            var row = sheet.GetRow(rowIdx);
+            for (var colIdx = firstCol; colIdx <= lastCol; colIdx++)
+            {
+                var cell = row?.GetCell(colIdx);
+                if (cell != null && cell.CellType == CellType.String)
+                {
+                    uniqueValues.Add(cell.StringCellValue);
+                }
+            }
+        }
+
+        return uniqueValues;
+    }
+
+    private static IRow GetOrCreateRow(ISheet sheet, int rowNumber)
+    {
+        return sheet.GetRow(rowNumber) ?? sheet.CreateRow(rowNumber);
+    }
+
+    private Dictionary<string, ISheet> Sheets { get; } = new();
+
+    public ISheet GetOrCreateSheet(string sheetName)
+    {
+        if (Sheets.TryGetValue(sheetName, out var value))
+        {
+            return value;
+        }
+
+        var sheet = _workbook.GetSheet(sheetName) ?? this._workbook.CreateSheet(sheetName);
+        Sheets.Add(sheetName, sheet);
+        return sheet;
+    }
+
+    public void Save(string fullPath)
+    {
+        using var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+        this._workbook.Write(fs);
+    }
+
+    public void WriteCellString(string sheetName, int rowNumber, int colNumber, string value)
+    {
+        var cell = this.GetOrCreateCell(sheetName, rowNumber, colNumber);
+        cell.SetCellValue(value);
+    }
+
+    public void WriteCellFormula(string sheetName, int rowNumber, int colNumber, string value)
+    {
+        try
+        {
+            var cell = this.GetOrCreateCell(sheetName, rowNumber, colNumber);
+            cell.SetCellFormula(value);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+    public void WriteCellNumber(string sheetName, int rowNumber, int colNumber, double value)
+    {
+        var cell = this.GetOrCreateCell(sheetName, rowNumber, colNumber);
+        cell.SetCellValue(value);
+        cell.SetCellType(CellType.Numeric);
+    }
+
+    private ICell GetOrCreateCell(string sheetName, int rowNumber, int colNumber)
+    {
+        var sheet = this.GetOrCreateSheet(sheetName);
+        var row = GetOrCreateRow(sheet, rowNumber);
+        return row.CreateCell(colNumber);
+    }
+
+    public static string GetColumnLetter(int col)
+    {
+        return CellReference.ConvertNumToColString(col);
     }
 }

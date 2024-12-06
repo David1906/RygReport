@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\david_ascencio\\RiderProjects\\RygReport\\RygReport\\RygReport.csproj": {}
+    "C:\\Users\\david\\Repos\\RygReport\\RygReport\\RygReport.csproj": {}
   },
   "projects": {
-    "C:\\Users\\david_ascencio\\RiderProjects\\RygReport\\RygReport\\RygReport.csproj": {
+    "C:\\Users\\david\\Repos\\RygReport\\RygReport\\RygReport.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\david_ascencio\\RiderProjects\\RygReport\\RygReport\\RygReport.csproj",
+        "projectUniqueName": "C:\\Users\\david\\Repos\\RygReport\\RygReport\\RygReport.csproj",
         "projectName": "RygReport",
-        "projectPath": "C:\\Users\\david_ascencio\\RiderProjects\\RygReport\\RygReport\\RygReport.csproj",
-        "packagesPath": "C:\\Users\\david_ascencio\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\david_ascencio\\RiderProjects\\RygReport\\RygReport\\obj\\",
+        "projectPath": "C:\\Users\\david\\Repos\\RygReport\\RygReport\\RygReport.csproj",
+        "packagesPath": "C:\\Users\\david\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\david\\Repos\\RygReport\\RygReport\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\david_ascencio\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\david\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -88,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Users\\david_ascencio\\.dotnet\\sdk\\8.0.303/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.403/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

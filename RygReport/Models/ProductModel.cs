@@ -9,6 +9,7 @@ public class ProductModel
     public string Program { get; set; } = "";
     public string ApnPcba { get; set; } = "";
     public string ApnDescription { get; set; } = "";
+    public double Qty { get; set; }
 }
 
 class NullProductModel : ProductModel
